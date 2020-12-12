@@ -82,16 +82,6 @@ int main(int argc, char *argv[]){
   printf("\n* (%s)\n", eu[proto.io]);
   puts("*********************************");
 
-  //salvo le informazioni nel file protocolli.csv
-  FILE *file;
-  file = fopen("protocolli.csv", "a");
-  if(file == NULL){
-    puts("Impossibile creare il file");
-    return 0;
-  }
-  fprintf(file, "%07u, %d/%d/%d, %s, %s, %s\n", proto.num, t->tm_year+1900, t->tm_mon+1, t->tm_mday, eu[proto.io], uffici[proto.ufficio], proto.oggetto);
-  fclose(file);
-
   shutdown(sd, 2);  //chiudo il socket
   return 0;
 }

@@ -78,6 +78,16 @@ int main(void){
     proto.num = sequence();   //assegno il numero di protocollo
     sendto(rc, (struct protocollo*)&proto, sizeof(proto), 0, (struct sockaddr *)&client, len);    //invio il protocollo completo al client
     printf("\nInviato: %07u, %s, %s, %s, %s\n", proto.num, uffici[proto.ufficio], eu[proto.io], proto.md, proto.oggetto);
+			//salvo le informazioni nel file protocolli.csv
+		FILE *file;
+		file = fopen("protocolli.csv", "a");
+		if(file == NULL){
+			puts("Impossibile creare il file");
+			return 0;
+		}
+		fprintf(file, "%07u, %d/%d/%d, %s, %s, %s\n", proto.num, t->tm_year+1900, t->tm_mon+1, t->tm_mday, eu[proto.io], uffici[proto.ufficio], proto.oggetto);
+		fclose(file);
   }
+	
   return 0;
 }
