@@ -1,10 +1,10 @@
-#include <sys/types.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
 #include<stdio.h>
 #include<stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 
 struct protocollo{     //Struttura che contiene le informazioni del protocollo
   unsigned int num;
@@ -75,12 +75,16 @@ int main(int argc, char *argv[]){
   //ricezione del protocollo
 
   recvfrom(sd, (struct protocollo*)&proto, sizeof(proto), 0, (struct sockaddr *) &server, &len);
-  printf("\nRievuto protocollo: \n\n");
-  puts("*********************************");
+  printf("\nRicevuto protocollo: \n\n");
+	for(register int i=0; i<(strlen(proto.md)+strlen(uffici[proto.ufficio])+5); ++i)
+  	printf("*");
+	puts("**");
   printf("* %s - %s", proto.md, uffici[proto.ufficio]);
   printf("\n* Prot: %07u del %02d/%02d/%d", proto.num, t->tm_mday, t->tm_mon+1, t->tm_year+1900);
   printf("\n* (%s)\n", eu[proto.io]);
-  puts("*********************************");
+ 	for(register int i=0; i<(strlen(proto.md)+strlen(uffici[proto.ufficio])+5); ++i)
+  	printf("*");
+	puts("**");
 
   shutdown(sd, 2);  //chiudo il socket
   return 0;

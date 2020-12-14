@@ -1,16 +1,16 @@
 #include<unistd.h>
 #include<stdio.h>
 #include<stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <sys/types.h>
-#include <sys/socket.h>
+#include<string.h>
+#include<time.h>
+#include<sys/types.h>
+#include<sys/socket.h>
 #include<sys/wait.h>
 #include<arpa/inet.h>
 #include<netinet/in.h>
 #include<signal.h>
-#include <errno.h>
-#include "sequence.h"
+#include<errno.h>
+#include"sequence.h"
 
 struct protocollo{              //Struttura che contiene le informazioni del protocollo
   unsigned int num;
@@ -64,7 +64,7 @@ int main(void){
   while(1){
     n = recvfrom(rc, (struct protocollo*)&proto, sizeof(proto), 0, (struct sockaddr *) &client, &len);    //ricevo le informazioni inviate dal client
     printf("Ricevuta richiesta di protocollo per: \n%s\nUfficio: %s\n(%s)\nOggetto: %s\n",proto.md, uffici[proto.ufficio], eu[proto.io], proto.oggetto);
-    if(t->tm_mon == 1&& t->tm_mday == 1){     //se è 1 gennaio azzera il numero di protocollo
+    if(t->tm_mon == 1 && t->tm_mday == 1){     //se è 1 gennaio azzera il numero di protocollo
       FILE *file;
       file = fopen("number.txt", "r+");
       if(file == NULL){
@@ -87,7 +87,6 @@ int main(void){
 		}
 		fprintf(file, "%07u, %d/%d/%d, %s, %s, %s\n", proto.num, t->tm_year+1900, t->tm_mon+1, t->tm_mday, eu[proto.io], uffici[proto.ufficio], proto.oggetto);
 		fclose(file);
-  }
-	
+  }	
   return 0;
 }
