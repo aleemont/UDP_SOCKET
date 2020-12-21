@@ -12,7 +12,8 @@
 #include<errno.h>
 #include"sequence.h"
 
-struct protocollo{              //Struttura che contiene le informazioni del protocollo
+struct protocollo			//Struttura che contiene le informazioni del protocollo
+{
   unsigned int num;
   unsigned int ufficio;
   unsigned int io;
@@ -24,7 +25,8 @@ void addr_init(struct sockaddr_in *addr, int port, long int ip);
 
 void check_proto(struct protocollo p);
 
-int main(void){
+int main(void)
+{
   unsigned short int port = atoi("8082");
   int rc = 0;
   struct sockaddr_in server, client;
@@ -45,13 +47,15 @@ int main(void){
   puts("Inizializzazione riuscita");
 
   rc = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);      //creo il socket
-  if(rc < 0){
+  if(rc < 0)
+	{
     puts("Impossibile creare socket");
     return -1;
   }
 
   int b = bind(rc, (struct sockaddr*) &server, sizeof(server));   //bind del socket sulla porta specificata
-  if(b < 0){
+  if(b < 0)
+	{
     puts("Impossibile collegarsi sulla porta specificata");
     return -1;
   }
@@ -59,21 +63,26 @@ int main(void){
   printf("In ascolto sulla porta: %i\n", port);
   unsigned int len = sizeof(client);
   int n=0;
-  while(1){
+
+	if(t->tm_mon == 1 && t->tm_mday == 1) //se è 1 gennaio azzera il numero di protocollo
+	{     
+    FILE *file;
+    file = fopen("number.txt", "r+");
+    if(file == NULL)
+		{
+      puts("File number.txt mancante, crealo e inserisci 0 nella prima riga!");
+      return -1;
+    }
+    fseek(file, 0, SEEK_SET);
+    fprintf(file, "%07u\n", 0);
+    fclose(file);
+  }
+
+  while(1)
+	{
     n = recvfrom(rc, (struct protocollo*)&proto, sizeof(proto), 0, (struct sockaddr *) &client, &len);    //ricevo le informazioni inviate dal client
 
     printf("Ricevuta richiesta di protocollo per:\nMittente: %s\nUfficio: %s\n(%s)\nOggetto: %s\n",proto.md, uffici[proto.ufficio], eu[proto.io], proto.oggetto);
-    if(t->tm_mon == 1 && t->tm_mday == 1){     //se è 1 gennaio azzera il numero di protocollo
-      FILE *file;
-      file = fopen("number.txt", "r+");
-      if(file == NULL){
-        puts("File number.txt mancante, crealo e inserisci 0 nella prima riga!");
-        return -1;
-      }
-      fseek(file, 0, SEEK_SET);
-      fprintf(file, "%07u\n", 0);
-      fclose(file);
-    }
     proto.num = sequence();   //assegno il numero di protocollo
     sendto(rc, (struct protocollo*)&proto, sizeof(proto), 0, (struct sockaddr *)&client, len);    //invio il protocollo completo al client
 		check_proto(proto);
@@ -81,7 +90,8 @@ int main(void){
 			//salvo le informazioni nel file protocolli.csv
 		FILE *file;
 		file = fopen("protocolli.csv", "a");
-		if(file == NULL){
+		if(file == NULL)
+		{
 			puts("Impossibile creare il file");
 			return 0;
 		}
@@ -91,18 +101,20 @@ int main(void){
   return 0;
 }
 
-void check_proto(struct protocollo p){
-	if(p.ufficio != 0 || p.ufficio != 1 || p.ufficio != 2)
+void check_proto(struct protocollo p)
+{
+	if(p.ufficio < 0 || p.ufficio > 2)
 		exit(1);
 	
 	if(p.num < 0)
 		exit(2);
 	
-	if(p.io != 0 || p.io != 1)
+	if(p.io < 0 || p.io > 1)
 		exit(3);
 }
 
-void addr_init(struct sockaddr_in *addr, int port, long int ip){
+void addr_init(struct sockaddr_in *addr, int port, long int ip)
+{
   addr->sin_family = AF_INET; //Inizializzo la famiglia di indirizzi (ipv4)
   addr->sin_port = htons((u_short) port); //conversione in little-endian del numero di porta (msb first)
   addr->sin_addr.s_addr = INADDR_ANY;
