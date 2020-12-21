@@ -63,8 +63,7 @@ int main(void)
   printf("In ascolto sulla porta: %i\n", port);
   unsigned int len = sizeof(client);
   int n=0;
-
-	if(t->tm_mon == 1 && t->tm_mday == 1) //se è 1 gennaio azzera il numero di protocollo
+	if(t->tm_mon + 1 == 1 && t->tm_mday == 1) //se è 1 gennaio azzera il numero di protocollo
 	{     
     FILE *file;
     file = fopen("number.txt", "r+");
