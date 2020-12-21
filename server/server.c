@@ -17,14 +17,12 @@ struct protocollo{              //Struttura che contiene le informazioni del pro
   unsigned int ufficio;
   unsigned int io;
   char oggetto[100];
-  char md[50];
+  char md[30];
 };
 
-void addr_init(struct sockaddr_in *addr, int port, long int ip){
-  addr->sin_family = AF_INET; //Inizializzo la famiglia di indirizzi (ipv4)
-  addr->sin_port = htons((u_short) port); //conversione in little-endian del numero di porta (msb first)
-  addr->sin_addr.s_addr = INADDR_ANY;
-}
+void addr_init(struct sockaddr_in *addr, int port, long int ip);
+
+void check_proto(struct protocollo p);
 
 int main(void){
   unsigned short int port = atoi("8082");
@@ -63,7 +61,8 @@ int main(void){
   int n=0;
   while(1){
     n = recvfrom(rc, (struct protocollo*)&proto, sizeof(proto), 0, (struct sockaddr *) &client, &len);    //ricevo le informazioni inviate dal client
-    printf("Ricevuta richiesta di protocollo per: \n%s\nUfficio: %s\n(%s)\nOggetto: %s\n",proto.md, uffici[proto.ufficio], eu[proto.io], proto.oggetto);
+
+    printf("Ricevuta richiesta di protocollo per:\nMittente: %s\nUfficio: %s\n(%s)\nOggetto: %s\n",proto.md, uffici[proto.ufficio], eu[proto.io], proto.oggetto);
     if(t->tm_mon == 1 && t->tm_mday == 1){     //se è 1 gennaio azzera il numero di protocollo
       FILE *file;
       file = fopen("number.txt", "r+");
@@ -77,7 +76,8 @@ int main(void){
     }
     proto.num = sequence();   //assegno il numero di protocollo
     sendto(rc, (struct protocollo*)&proto, sizeof(proto), 0, (struct sockaddr *)&client, len);    //invio il protocollo completo al client
-    printf("\nInviato: %07u, %s, %s, %s, %s\n", proto.num, uffici[proto.ufficio], eu[proto.io], proto.md, proto.oggetto);
+		check_proto(proto);
+    printf("\nInviato: %07u, %s, %s, %s, %s\n", proto.num, uffici[proto.ufficio], eu[proto.io], proto.oggetto, proto.md);
 			//salvo le informazioni nel file protocolli.csv
 		FILE *file;
 		file = fopen("protocolli.csv", "a");
@@ -89,4 +89,21 @@ int main(void){
 		fclose(file);
   }	
   return 0;
+}
+
+void check_proto(struct protocollo p){
+	if(p.ufficio != 0 || p.ufficio != 1 || p.ufficio != 2)
+		exit(1);
+	
+	if(p.num < 0)
+		exit(2);
+	
+	if(p.io != 0 || p.io != 1)
+		exit(3);
+}
+
+void addr_init(struct sockaddr_in *addr, int port, long int ip){
+  addr->sin_family = AF_INET; //Inizializzo la famiglia di indirizzi (ipv4)
+  addr->sin_port = htons((u_short) port); //conversione in little-endian del numero di porta (msb first)
+  addr->sin_addr.s_addr = INADDR_ANY;
 }
