@@ -6,6 +6,9 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
+#define TIMEOUT 2*CLOCKS_PER_SEC
+#define UDP_PORT "8082"
+
 struct protocollo			//Struttura che contiene le informazioni del protocollo
 {     
   unsigned int num;
@@ -24,13 +27,15 @@ void addr_init(struct sockaddr_in *addr, int port, long int ip)
 int main(int argc, char *argv[])
 {
 	int n_err = 0;
-  int port = atoi("8082");
+  int port = atoi(UDP_PORT);
   int sd = 0;
   in_addr_t addr;
   struct in_addr a;
   struct sockaddr_in server;
   struct protocollo proto = {0, 0, 0, "", "I.T.T. \"G. Giorgi\" - Brindisi"};
   time_t now = time(0);
+	time_t start;
+	time_t stop;
   struct tm *t = gmtime(&now);
   char *uffici[3]={"Presidenza", "Segreteria docenti", "Segreteria Alunni"};
   char *eu[2]={"Entrata", "Uscita"};
@@ -94,7 +99,6 @@ int main(int argc, char *argv[])
   unsigned int len = sizeof(server);
 
   //invio le informazioni del documento al server
-
   int n = sendto(sd, (struct protocollo*)&proto, sizeof(proto), 0, (struct sockaddr *) &server, len);
   if(n < 0)
 	{
@@ -103,21 +107,30 @@ int main(int argc, char *argv[])
     return -1;
   }
   printf("\nInvio al server: \n\nUfficio: %s\n(%s)\nOggetto:%s\nMittente/Destinatario: %s\n", uffici[proto.ufficio], eu[proto.io], proto.oggetto, proto.md);
-
   //ricezione del protocollo
+	start = clock();
+	stop = clock();
+	while ((stop - start) < TIMEOUT)
+	{
+		if(recvfrom(sd, (struct protocollo*)&proto, sizeof(proto), 0, (struct sockaddr *) &server, &len) == sizeof(proto))
+		{
+			printf("\nRicevuto protocollo: \n\n");
+			for(register int i=0; i<(strlen(proto.md)+strlen(uffici[proto.ufficio])+5); ++i)
+				printf("*");
+			puts("**");
+			printf("* %s - %s", proto.md, uffici[proto.ufficio]);
+			printf("\n* Prot: %07u del %02d/%02d/%d", proto.num, t->tm_mday, t->tm_mon+1, t->tm_year+1900);
+			printf("\n* (%s)\n", eu[proto.io]);
+			for(register int i=0; i<(strlen(proto.md)+strlen(uffici[proto.ufficio])+5); ++i)
+				printf("*");
+			puts("**");
 
-  recvfrom(sd, (struct protocollo*)&proto, sizeof(proto), 0, (struct sockaddr *) &server, &len);
-  printf("\nRicevuto protocollo: \n\n");
-	for(register int i=0; i<(strlen(proto.md)+strlen(uffici[proto.ufficio])+5); ++i)
-  	printf("*");
-	puts("**");
-  printf("* %s - %s", proto.md, uffici[proto.ufficio]);
-  printf("\n* Prot: %07u del %02d/%02d/%d", proto.num, t->tm_mday, t->tm_mon+1, t->tm_year+1900);
-  printf("\n* (%s)\n", eu[proto.io]);
- 	for(register int i=0; i<(strlen(proto.md)+strlen(uffici[proto.ufficio])+5); ++i)
-  	printf("*");
-	puts("**");
-
-  shutdown(sd, 2);  //chiudo il socket
-  return 0;
+			shutdown(sd, 2);  //chiudo il socket
+			return 0;
+		}
+		stop = clock();
+	}
+	puts("Nessuna risposta dal server...");
+	shutdown(sd, 2);  //chiudo il socket
+	return -1;
 }
