@@ -30,8 +30,8 @@ int main(void)
   unsigned short int port = atoi("8082");
   int rc = 0;
   struct sockaddr_in server, client;
-  struct in_addr a;
   struct protocollo proto;
+  struct in_addr a;
   in_addr_t addr;
   time_t now = time(0);
   struct tm *t = gmtime(&now);
@@ -62,24 +62,38 @@ int main(void)
 
   printf("In ascolto sulla porta: %i\n", port);
   unsigned int len = sizeof(client);
-  int n=0;
-	if(t->tm_mon + 1 == 1 && t->tm_mday == 1) //se è 1 gennaio azzera il numero di protocollo
-	{     
-    FILE *file;
-    file = fopen("number.txt", "r+");
-    if(file == NULL)
-		{
+  int y, m, d;
+  unsigned int azzerato;
+  if(t->tm_mon + 1 == 1 && t->tm_mday == 1) //se 1 gennaio azzera il numero di protocollo
+  {
+     azzerato = 1;
+     int n;
+     FILE *file;
+     file = fopen("number.txt", "r+");
+     if(file == NULL)
+     {
       puts("File number.txt mancante, crealo e inserisci 0 nella prima riga!");
       return -1;
-    }
-    fseek(file, 0, SEEK_SET);
-    fprintf(file, "%07u\n", 0);
-    fclose(file);
+     }
+     if(fscanf(file, "%07u", &n) != 1){
+       fclose(file);
+       return -1;
+     }
+     while(fscanf(file, "%u", &azzerato)!= EOF){}
+     if(azzerato == 0)
+     {
+       azzerato = 1;
+       n = 0;
+       fseek(file, 0, SEEK_SET);
+       fprintf(file, "%07u\n", n);
+       fprintf(file, "%u\n", azzerato);
+       fclose(file);
+     }
   }
 
   while(1)
 	{
-    n = recvfrom(rc, (struct protocollo*)&proto, sizeof(proto), 0, (struct sockaddr *) &client, &len);    //ricevo le informazioni inviate dal client
+    int n = recvfrom(rc, (struct protocollo*)&proto, sizeof(proto), 0, (struct sockaddr *) &client, &len);    //ricevo le informazioni inviate dal client
 
     printf("Ricevuta richiesta di protocollo per:\nMittente: %s\nUfficio: %s\n(%s)\nOggetto: %s\n",proto.md, uffici[proto.ufficio], eu[proto.io], proto.oggetto);
     proto.num = sequence();   //assegno il numero di protocollo
@@ -96,7 +110,7 @@ int main(void)
 		}
 		fprintf(file, "%07u, %d/%d/%d, %s, %s, %s\n", proto.num, t->tm_year+1900, t->tm_mon+1, t->tm_mday, eu[proto.io], uffici[proto.ufficio], proto.oggetto);
 		fclose(file);
-  }	
+  }
   return 0;
 }
 
@@ -104,10 +118,10 @@ void check_proto(struct protocollo p)
 {
 	if(p.ufficio < 0 || p.ufficio > 2)
 		exit(1);
-	
+
 	if(p.num < 0)
 		exit(2);
-	
+
 	if(p.io < 0 || p.io > 1)
 		exit(3);
 }

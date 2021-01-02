@@ -5,7 +5,7 @@ unsigned int sequence(void){
 	unsigned int n;
 	file = fopen("number.txt", "r+");
 	if(file == NULL){
-		puts("File number.txt mancante, crealo e inserisci 0 nella prima riga!");
+		puts("File number.txt mancante, crealo e inserisci uno 0 nella prima e uno 0 nella seconda riga!");
 		return -1;
 	}
 	if(fscanf(file, "%07u", &n) != 1){
