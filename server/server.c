@@ -62,35 +62,28 @@ int main(void)
 
   printf("In ascolto sulla porta: %i\n", port);
   unsigned int len = sizeof(client);
-  int y, m, d;
-  unsigned int azzerato;
-  if(t->tm_mon + 1 == 1 && t->tm_mday == 1) //se 1 gennaio azzera il numero di protocollo
+  int y, m, d, n;
+  FILE *file;
+  file = fopen("number.txt", "r+");
+  if(file == NULL)
   {
-     azzerato = 1;
-     int n;
-     FILE *file;
-     file = fopen("number.txt", "r+");
-     if(file == NULL)
-     {
-      puts("File number.txt mancante, crealo e inserisci 0 nella prima riga!");
-      return -1;
-     }
-     if(fscanf(file, "%07u", &n) != 1){
-       fclose(file);
-       return -1;
-     }
-     while(fscanf(file, "%u", &azzerato)!= EOF){}
-     if(azzerato == 0)
-     {
-       azzerato = 1;
-       n = 0;
-       fseek(file, 0, SEEK_SET);
-       fprintf(file, "%07u\n", n);
-       fprintf(file, "%u\n", azzerato);
-       fclose(file);
-     }
+    puts("File number.txt mancante, crealo e inserisci 0 nella prima riga e l'anno corrente nella seconda!");
+    return -1;
   }
-
+  if(fscanf(file, "%07u", &n) != 1){
+    fclose(file);
+    return -1;
+  }
+  while(fscanf(file, "%u", &y)!= EOF){}
+	if(y != t->tm_year+1900)
+	{
+		y = t->tm_year+1900;
+		n = 0;
+		fseek(file, 0, SEEK_SET);
+		fprintf(file,"%07u\n",n);
+		fprintf(file, "%04u", y);
+		fclose(file);
+	}
   while(1)
 	{
     int n = recvfrom(rc, (struct protocollo*)&proto, sizeof(proto), 0, (struct sockaddr *) &client, &len);    //ricevo le informazioni inviate dal client
