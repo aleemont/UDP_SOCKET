@@ -1,16 +1,16 @@
-#include<unistd.h>
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include<time.h>
-#include<sys/types.h>
-#include<sys/socket.h>
-#include<sys/wait.h>
-#include<arpa/inet.h>
-#include<netinet/in.h>
-#include<signal.h>
-#include<errno.h>
-#include"sequence.h"
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/wait.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <signal.h>
+#include <errno.h>
+#include "sequence.h"
 
 struct protocollo			//Struttura che contiene le informazioni del protocollo
 {

@@ -1,5 +1,5 @@
-#include<stdio.h>
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <sys/types.h>
@@ -12,10 +12,10 @@
 struct protocollo			//Struttura che contiene le informazioni del protocollo
 {     
   unsigned int num;
-  unsigned int ufficio;
-  unsigned int io;
-  char oggetto[100];
-  char md[30];
+  unsigned int ufficio; 
+  unsigned int io; //Entrata o uscita
+  char oggetto[100]; 
+  char md[30]; //Mittente (I.T.T. G. Giorgi Brindisi)
 };
 void addr_init(struct sockaddr_in *addr, int port, long int ip)
 {
